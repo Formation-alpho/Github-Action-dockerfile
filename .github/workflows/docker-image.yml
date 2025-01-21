@@ -1,0 +1,38 @@
+name: CI/CD Pipeline with Docker
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Étape 1 : Checkout du dépôt
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    # Étape 2 : Construire l'image Docker
+    - name: Build Docker image
+      run: docker build -t my-resume-web-site .
+
+    # Étape 3 : Lancer un conteneur Docker
+    - name: Run Docker container
+      run: |
+        docker run -d -p 8080:80 --name my-resume-web-site-conteneur my-resume-web-site
+        sleep 5 # Attendre que le conteneur soit démarré
+
+    # Étape 4 : Vérifier que l'application est accessible
+    - name: Test application
+      run: curl -f http://localhost:8080
+
+    # Étape 5 : Nettoyer les ressources Docker
+    - name: Cleanup
+      run: |
+        docker stop my-resume-web-site-conteneur
+        docker rm my-resume-web-site-conteneur
